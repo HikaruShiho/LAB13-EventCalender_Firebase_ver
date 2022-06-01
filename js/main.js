@@ -52,8 +52,42 @@ const clickEventsFunc = function () {
 	document.getElementById("login_btn").addEventListener("click", loginUser);
 	document.getElementById("logout_btn").addEventListener("click", logOut);
 	document.getElementById("serch_schedule").addEventListener("input", searchSchedule);
-	// document.getElementById("upload_csv").addEventListener("change", csv);
+	document.getElementById("upload_csv").addEventListener("change", csv);
 	// document.getElementById("register_btn").addEventListener("click", registerUser);
+}
+
+/**
+ * CSVで予定を追加
+ * @return { viod }
+ * @param { csv }
+ */
+const csv = function (csv) {
+	const reader = new FileReader();
+	reader.readAsText(csv.target.files[0],);
+	reader.onload = function () {
+		let schedules = reader.result.split(/\r\n|\n|\r/g);
+		let schedulesList = schedules.map(function (schedule) {
+			return schedule.split(',');
+		});
+		//headerを削除
+		const process_schedules = schedulesList.slice(1);
+		process_schedules.forEach(function (v, i, schedule) {
+			const dbref = ref(db, "calender/schedules");
+			const newPostRef = push(dbref);
+			set(newPostRef, {
+				title: schedule[i][0],
+				start_at: dateToTimestamp(schedule[i][1], schedule[i][2]),
+				end_at: dateToTimestamp(schedule[i][3], schedule[i][4]),
+				place: schedule[i][5],
+				url: schedule[i][6],
+				author: schedule[i][7],
+				color: schedule[i][8],
+				discription: schedule[i][9],
+				create_at: serverTimestamp(),
+				update_at: serverTimestamp(),
+			});
+		});
+	}
 }
 
 /**
